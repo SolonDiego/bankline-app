@@ -96,3 +96,16 @@ public class WebConfig implements WebMvcConfigurer {
 //
 
 ng g s services/movimentacao
+
+// app.module.ts
+
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+@NgModule({
+  imports: [
+    FormsModule,
+    HttpClientModule
+  ],
+  
+})
