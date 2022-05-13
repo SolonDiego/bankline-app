@@ -1,0 +1,98 @@
+https://glysns.gitbook.io/java-full-stack/stack-angular/projeto
+
+node --version
+e 
+npm --version
+
+npm install -g @angular/cli
+
+// obtendo a versão do Angular CLI
+
+ng --version
+
+//gerando uma nova aplicação
+//é importante que este comando segue executado em c:\estudos
+//deste forma já teremos um recurso de teste e o TypeScript configurado
+
+ng new bankline-app
+
+//após abrir o projeto no VSCode
+ng serve -o
+
+ng g c components/movimentacao-list
+
+ng g c components/movimentacao-new
+
+// localize o arquivo src/app/app-routing.module.ts
+
+import { MovimentacaoNewComponent } from './components/movimentacao-new/movimentacao-new.component';
+import { MovimentacaoListComponent } from './components/movimentacao-list/movimentacao-list.component';
+
+const routes: Routes = [
+
+  { path: 'movimentacoes-new', component: MovimentacaoNewComponent },
+  { path: 'movimentacoes', component: MovimentacaoListComponent },
+  { path: '', redirectTo: 'movimentacoes', pathMatch: 'full' },
+
+];
+
+ng serve -o
+
+// no terminal, pare a aplicação com CTRL+C
+
+ng add @ng-bootstrap/ng-bootstrap
+
+//Se ao tentar instalar o bootstrap apresentar algum erro, execute os comandos abaixo e repita o processo acima.
+npm config set legacy-peer-deps true
+
+// movimentacao-list.component.ts
+
+movimentacoes:any;
+
+// movimentacao-list.component.html
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Data Hora</th>
+      <th scope="col">Descrição</th>
+      <th scope="col">Valor</th>
+      <th scope="col">Tipo</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of movimentacoes; index as i">
+      <th scope="row">{{ i + 1 }}</th>
+      <td>{{ item.dataHora }}</td>
+      <td>{{ item.descricao }}</td>
+      <td>{{ item.valor }}</td>
+      <td>{{ item.tipo }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+ng serve -o
+
+// WebConfig.java
+
+package com.dio.santander.bankline.api.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**");
+    }
+}
+
+//
+
+ng g s services/movimentacao
