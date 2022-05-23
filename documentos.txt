@@ -396,3 +396,200 @@ public class MovimentacaoController {
 		return repository.findByIdConta(idConta);
 	}
 }
+
+<div class="container">
+  <div class="jumbotron">
+    <h1 class="display-6">Movimentações</h1>
+    <p class="lead-1">Listagem das movimentações por correntista</p>
+    <hr class="my-2">
+    <div class="input-group">
+      <select  id="iCorrentista" [(ngModel)]="correntista" class="form-select">
+        <option *ngFor="let c of correntistas" [ngValue]="c" >{{c.cpf}}-{{c.nome}}</option>
+      </select>
+    <button class="btn btn-outline-secondary me-md-2 btn-sm" type="button" (click)="listMovimentacoes()">Buscar</button>
+    <a class="btn btn-outline-primary btn-sm" routerLink="/movimentacoes-new">Nova Movimentação</a>
+    <a class="btn btn-outline-primary btn-sm" routerLink="/correntistas">Correntistas</a>
+  </div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Data Hora</th>
+      <th scope="col">Descrição</th>
+      <th scope="col">Valor</th>
+      <th scope="col">Tipo</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of movimentacoes; index as i">
+      <th scope="row">{{ i + 1 }}</th>
+      <td>{{ item.dataHora | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+      <td>{{ item.descricao }}</td>
+      <td [ngStyle]="{'color':item.tipo === 'RECEITA' ? 'blue' : 'red'}">{{ item.valor | currency:'BRL' }}</td>
+      <td>{{ item.tipo }}</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+ng serve -o
+
+findByIdConta(idConta:any): Observable<any> {
+    return this.http.get(`${baseUrl}/movimentacoes/${idConta}`);
+  }
+
+// components/movimentacao-list.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { CorrentistaService } from 'src/app/services/correntista.service';
+import { MovimentacaoService } from 'src/app/services/movimentacao.service';
+
+@Component({
+  selector: 'app-movimentacao-list',
+  templateUrl: './movimentacao-list.component.html',
+  styleUrls: ['./movimentacao-list.component.css']
+})
+
+
+export class MovimentacaoListComponent implements OnInit {
+  movimentacoes:any;
+  correntistas:any;
+  correntista:any={};
+  constructor(
+    private movimentacaoService: MovimentacaoService,
+    private correntistaService: CorrentistaService,
+    ) { }
+  ngOnInit(): void {
+    this.exibirCorrentistas();
+  }
+  
+  listMovimentacoes(): void {
+    this.movimentacaoService.findByIdConta(this.correntista.id)
+      .subscribe(
+        data => {
+          this.movimentacoes = data;
+          console.log(data);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+  exibirCorrentistas(): void {
+    this.correntistaService.list()
+      .subscribe(
+        data => {
+          this.correntistas = data;
+          console.log(data);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+  
+}
+
+
+//terminal
+
+ng g c components/correntista
+
+
+// app-routing.module.ts
+
+import { CorrentistaComponent } from './components/correntista/correntista.component';
+const routes: Routes = [
+     ...
+     { path: 'correntistas', component: CorrentistaComponent },
+]
+
+
+// components/correntista.component.html
+
+<div class="container">
+  <div class="jumbotron">
+    <h1 class="display-6">Correntistas</h1>
+    <p class="lead-1">Cadastro de correntista</p>
+    <hr class="my-2">
+  </div>
+  <div class="row g-2">
+    <div class="col-md-3">
+      <input  class="form-control" id="iCpf" [(ngModel)]="cpf"  placeholder="CPF">
+    </div>
+    <div class="col-5">
+      <input type="text"  class="form-control" id="iNome" [(ngModel)]="nome" placeholder="Nome do Correntista">
+    </div>
+    <div class="col-3">
+    <div class="d-grid gap-2 d-md-flex ">
+        <button class="btn btn-outline-primary me-md-2" type="button" (click)="save()" >Gravar</button>
+        <a routerLink="/movimentacoes" class="btn btn-outline-danger">Voltar</a>
+      </div>
+    </div>
+  </div>
+  <p></p>
+  <div *ngFor="let item of correntistas; index as i" class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{item.nome}}</h5>
+      <p class="card-text">Conta N° {{item.conta.numero}}</p>
+      <p class="card-text">Saldo {{item.conta.saldo | currency:'BRL'}}</p>
+    </div>
+  </div>
+</div>
+
+
+// components/correntista.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { CorrentistaService } from 'src/app/services/correntista.service';
+
+
+@Component({
+  selector: 'app-correntista',
+  templateUrl: './correntista.component.html',
+  styleUrls: ['./correntista.component.css']
+})
+export class CorrentistaComponent implements OnInit {
+  correntistas:any;
+  cpf:any;
+  nome:any;
+  constructor(
+    private correntistaService: CorrentistaService,
+    ) { }
+  ngOnInit(): void {
+    this.exibirCorrentistas();
+  }
+  exibirCorrentistas(): void {
+    this.correntistaService.list()
+      .subscribe(
+        data => {
+          this.correntistas = data;
+          console.log(data);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+  save(): void {
+    const correntista = {
+      cpf:this.cpf,
+      nome:this.nome
+    };
+    console.log(correntista);
+    this.correntistaService.create(correntista)
+      .subscribe(
+        response => {
+          console.log(response);
+          this.exibirCorrentistas();
+        },
+        error => {
+          console.log(error);
+        });
+  }
+}
+
+
+// services/correntista.service.ts
+
+ create(correntista:any): Observable<any> {
+    return this.http.post(`${baseUrl}/correntistas`,correntista);
+  }
