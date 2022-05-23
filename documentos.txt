@@ -109,3 +109,290 @@ import { HttpClientModule } from '@angular/common/http';
   ],
   
 })
+
+
+// movimentacao.service.ts
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+//mude para sua aplicação
+const baseUrl = 'http://localhost:8080';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MovimentacaoService {
+  constructor(private http: HttpClient) { }
+  
+  list(): Observable<any> {
+    return this.http.get(`${baseUrl}/movimentacoes`);
+  }
+  
+}
+
+
+ng serve -o
+
+
+// movimentacao-list.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { MovimentacaoService } from 'src/app/services/movimentacao.service';
+
+@Component({
+  selector: 'app-movimentacao-list',
+  templateUrl: './movimentacao-list.component.html',
+  styleUrls: ['./movimentacao-list.component.css']
+})
+
+
+export class MovimentacaoListComponent implements OnInit {
+  movimentacoes:any;
+
+  constructor(private movimentacaoService: MovimentacaoService) { }
+
+  ngOnInit(): void {
+    this.listMovimentacoes();
+  }
+  listMovimentacoes(): void {
+    this.movimentacaoService.list()
+      .subscribe(
+        data => {
+          this.movimentacoes = data;
+          console.log(data);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+
+}
+
+
+// app.module.ts
+
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+
+registerLocaleData(localePt);
+... 
+
+ providers: [{provide: LOCALE_ID, useValue: 'pt-BR'}],
+
+
+// movimentacao-list.component.html
+
+<td>{{ item.dataHora | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+<td>{{ item.valor | currency:'BRL' }}</td>
+
+
+// movimentacao-list.component.html
+
+<td [ngStyle]="{'color':item.tipo === 'RECEITA' ? 'blue' : 'red'}">{{ item.valor | currency:'BRL' }}</td
+
+
+// movimentacao-list.component.html
+
+//link tem o mesmo estilo que um button
+
+<a class="btn btn-outline-primary btn-sm">Nova Movimentação</a>
+
+
+// movimentacao-list.component.html
+
+<div class="container">
+
+//conteúdo já existente
+
+</div>
+
+
+// movimentacao-list.component.html
+
+<a routerLink="/movimentacoes-new">Novo</a>
+
+
+// movimentacao-new.component.html
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="display-6">Movimentação</h1>
+        <p class="lead-1">Inclusão de uma nova movimentação</p>
+        <hr class="my-2">
+        
+        
+            <div class="col-md-3">
+              <label for="iData" class="form-label">Data</label>
+              <input type="date" class="form-control" id="iData">
+            </div>
+            <div class="col-md-9">
+              <label for="iCorrentista" class="form-label">Correntista</label>
+              <select id="iCorrentista" class="form-select">
+                <option selected>Choose...</option>
+                <option>...</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="iDescricao" class="form-label">Descrição</label>
+              <input type="text" class="form-control" id="iDescricao" placeholder="Informe uma descrição">
+            </div>
+            <div class="col-md-3">
+              <label for="iTipo" class="form-label">Tipo Movimentação</label>
+              <select id="iTipo" class="form-select">
+                <option selected>Tipos</option>
+                <option>...</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="iValor" class="form-label">R$ Valor</label>
+              <input type="text" class="form-control" id="iValor">
+            </div>
+            <div class="d-grid gap-2 d-md-flex ">
+                <button class="btn btn-outline-primary me-md-2" type="button">Confirmar</button>
+                <a routerLink="/movimentacoes" class="btn btn-outline-secondary">Cancelar</a>
+              </div>
+         
+      </div>
+
+</div>
+
+
+
+<select id="iTipo" class="form-select">
+    <option selected>RECEITA</option>
+    <option>DESPESA</option>
+</select>
+
+
+// criando o serviço para acessar os recursos de Correntista
+
+ng g s services/correntista
+
+
+// services/correntista.service.ts
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+const baseUrl = 'http://localhost:8080';
+@Injectable({
+  providedIn: 'root'
+})
+export class CorrentistaService {
+  constructor(private http: HttpClient) { }
+  
+  list(): Observable<any> {
+    return this.http.get(`${baseUrl}/correntistas`);
+  }
+}
+
+
+
+// compoenents/movimentacao-new.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { CorrentistaService } from 'src/app/services/correntista.service';
+import { MovimentacaoService } from 'src/app/services/movimentacao.service';
+
+@Component({
+  selector: 'app-movimentacao-new',
+  templateUrl: './movimentacao-new.component.html',
+  styleUrls: ['./movimentacao-new.component.css']
+})
+export class MovimentacaoNewComponent implements OnInit {
+  correntistas:any;
+
+  constructor(
+    private movimentacaoService: MovimentacaoService,
+    private correntistaService: CorrentistaService,
+    ) { }
+
+  ngOnInit(): void {
+    this.exibirCorrentistas();
+  }
+  exibirCorrentistas(): void {
+    this.correntistaService.list()
+      .subscribe(
+        data => {
+          this.correntistas = data;
+          console.log(data);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+
+}
+
+
+
+// movimentacao-new.component.html
+ <select id="iCorrentista" [(ngModel)]="correntista" class="form-select">
+   <option *ngFor="let c of correntistas" [ngValue]="c">{{c.cpf}}-{{c.nome}}</option>
+ </select>
+
+
+// movimentacao-new.component.ts.
+correntista:any;
+
+
+// services/movimentacao.service.ts
+
+// adicionando o método de inclusão (POST) via API
+create(movimentacao:any): Observable<any> {
+    return this.http.post(`${baseUrl}/movimentacoes`,movimentacao);
+ }
+
+
+// components/movimentacao-new.components.ts
+
+// criando o método para ser chamado na tela e assim incluir a movimentação
+
+save(): void {
+    console.log(this.correntista)
+    const movimentacao = {
+      valor:this.valor,
+      descricao:this.descricao,
+      tipo:this.tipo,
+      idConta:this.correntista.id,
+      dataHora:this.dataHora
+
+    };
+    console.log(movimentacao);
+    this.movimentacaoService.create(movimentacao)
+      .subscribe(
+        response => {
+          console.log(response);
+        },
+        error => {
+          console.log(error);
+        });
+  }
+  
+
+// components/movimentacao-new.components.html
+
+<button class="btn btn-outline-primary me-md-2 btn-sm" type="button" (click)="save()">Confirmar</button>
+
+//(click)="save()"         
+
+
+/ MovimentacaoRepository.java
+
+public MovimentacaoRepository{
+     ...
+     public List<Movimentacao>findByIdConta(Integer idConta);
+}
+
+
+// MovimentacaoController.java
+
+public class MovimentacaoController {
+        ... 
+        @GetMapping("/{idConta}")
+	public List<Movimentacao> findAll(@PathVariable("idConta") Integer idConta){
+		return repository.findByIdConta(idConta);
+	}
+}
